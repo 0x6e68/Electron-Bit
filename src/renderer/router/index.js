@@ -15,4 +15,4 @@ export default new Router({
       redirect: '/'
     }
   ]
-})
+});
