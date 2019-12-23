@@ -16,6 +16,7 @@ module.exports = {
     'html'
   ],
   'rules': {
+    'skipBlankLines': true,
     'semi': [2, 'always'],
     'no-extra-semi': 'off',
     // allow paren-less arrow functions
