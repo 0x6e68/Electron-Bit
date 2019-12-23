@@ -1,0 +1,16 @@
+{
+  "name": "Eletron-Bit",
+  "version": "1.0.0",
+  "description": "A minimal Electron application",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^7.1.7"
+  },
+  "dependencies": {
+    "webtorrent": "^0.107.17"
+  }
+}
