@@ -24,8 +24,8 @@ export default class TorrentClipboardListener {
 
           const metaClient = new WebTorrent();
 
-          metaClient.add(content);
-          metaClient.on('torrent', function (torrent) {
+          let torrent = metaClient.add(content);
+          torrent.on('metadata', function () {
             console.log('loaded meta informations of ', torrent.name);
             metaClient.remove(torrent);
             metaClient.destroy();
@@ -38,6 +38,19 @@ export default class TorrentClipboardListener {
               files: []
             });
           });
+          // metaClient.on('torrent', function (torrent) {
+          //   console.log('loaded meta informations of ', torrent.name);
+          //   metaClient.remove(torrent);
+          //   metaClient.destroy();
+          //   loadedTorrentCallback({
+          //     name: torrent.name,
+          //     infoHash: torrent.infoHash,
+          //     magnetLink: content,
+          //     totalSize: torrent.length,
+          //     downloadPath: torrent.path,
+          //     files: []
+          //   });
+          // });
         }
       }
     }, timeout);
