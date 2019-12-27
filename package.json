@@ -55,12 +55,18 @@
   "dependencies": {
     "axios": "^0.18.0",
     "fs-extra": "^8.1.0",
+    "mkdir-recursive": "^0.4.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "vuex-electron": "^1.0.0",
-    "webtorrent": "^0.107.17"
+    "webtorrent": "^0.107.17",
+    "random-access-file": "^2.0.1",
+    "randombytes": "^2.0.3",
+    "rimraf": "^3.0.0",
+    "run-parallel": "^1.1.2",
+    "thunky": "^1.0.1"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
