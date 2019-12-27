@@ -1,15 +1,14 @@
 <template>
     <div>
         <loading-magnet-link v-for="magnetLink in detectedMagnetLinks"
+                             v-bind:key="magnetLink.infoHash"
                              :name="magnetLink.name"
                              :info-hash="magnetLink.infoHash"></loading-magnet-link>
         <hr/>
 
-        <ready-to-start-torrent v-for="torrent in loadedTorrents"
-                                :name="torrent.name"
-                                :info-hash="torrent.infoHash"
-                                :magnet-link="torrent.magnetLink"
-                                :default-download-path="torrent.downloadPath">
+        <ready-to-start-torrent v-for="torrent in torrents"
+                                v-bind:key="torrent.infoHash"
+                                :torrent="torrent">
         </ready-to-start-torrent>
     </div>
 </template>
@@ -26,16 +25,17 @@
     data () {
       return {
         detectedMagnetLinks: [],
-        loadedTorrents: []
+        torrents: []
       };
     },
     mounted () {
       electron.ipcRenderer.on('magnet-link-detected', (event, magnetLink) => {
+        console.log('magnet-link-detected');
         this.detectedMagnetLinks.push(magnetLink);
       });
       electron.ipcRenderer.on('torrent-loaded', (event, torrent) => {
         this.detectedMagnetLinks = this.detectedMagnetLinks.filter((item) => item.infoHash !== torrent.infoHash);
-        this.loadedTorrents.push(torrent);
+        this.torrents.push(torrent);
       });
     }
   };

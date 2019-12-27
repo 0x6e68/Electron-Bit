@@ -1,7 +1,7 @@
 <template>
     <div>
         <p>
-            [{{infoHash}}] {{name}}
+            [{{torrent.infoHash}}] {{torrent.name}}
         </p>
         <p>
             <input type="text" :value="downloadPath" readonly>
@@ -24,34 +24,23 @@
       triggerDownload () {
         console.log('beginn-download', this.infoHash);
         electron.ipcRenderer.send('beginn-download', {
-          infoHash: this.infoHash,
-          downloadPath: this.downloadPath,
-          magnetLink: this.magnetLink
+          infoHash: this.torrent.infoHash,
+          downloadPath: this.torrent.downloadPath,
+          magnetLink: this.torrent.magnetLink
         });
       },
       changeDownloadPath (event) {
-        this.downloadPath = event.target.files[0].path;
+        this.torrent.downloadPath = event.target.files[0].path;
       }
     },
     data () {
       return {
-        downloadPath: this.defaultDownloadPath
+        downloadPath: this.torrent.defaultDownloadPath
       };
     },
-    props: {
-      name: {
-        type: String
-      },
-      infoHash: {
-        type: String
-      },
-      defaultDownloadPath: {
-        type: String
-      },
-      magnetLink: {
-        type: String
-      }
-    }
+    props: [
+      'torrent'
+    ]
   };
 </script>
 
