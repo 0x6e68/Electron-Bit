@@ -1,7 +1,7 @@
 <template>
     <div>
         <p>
-            [{{torrent.infoHash}}] {{torrent.name}}
+            [{{torrentMetainfo.infoHash}}] {{torrentMetainfo.name}}
         </p>
         <p>
             <input type="text" :value="downloadPath" readonly>
@@ -19,27 +19,28 @@
   const electron = require('electron');
 
   export default {
-    name: 'ReadyToStartTorrent',
+    name: 'TorrentElement',
     methods: {
       triggerDownload () {
-        console.log('beginn-download', this.infoHash);
+        console.log('beginn-download', this.torrentMetainfo.infoHash);
         electron.ipcRenderer.send('beginn-download', {
-          infoHash: this.torrent.infoHash,
-          downloadPath: this.torrent.downloadPath,
-          magnetLink: this.torrent.magnetLink
+          infoHash: this.torrentMetainfo.infoHash,
+          downloadPath: this.downloadPath,
+          magnetLink: this.torrentMetainfo.magnetLink
         });
       },
       changeDownloadPath (event) {
-        this.torrent.downloadPath = event.target.files[0].path;
+        console.log(event.target.files[0].path);
+        this.downloadPath = event.target.files[0].path;
       }
     },
     data () {
       return {
-        downloadPath: this.torrent.defaultDownloadPath
+        downloadPath: this.torrentMetainfo.defaultDownloadPath
       };
     },
     props: [
-      'torrent'
+      'torrentMetainfo'
     ]
   };
 </script>
