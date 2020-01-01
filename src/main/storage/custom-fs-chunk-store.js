@@ -110,6 +110,10 @@ function Storage (chunkLength, opts) {
   }
 }
 
+Storage.getDefaultTemporaryPath = function () {
+  return TMP;
+};
+
 Storage.prototype.put = function (index, buf, cb) {
   var self = this;
   if (typeof cb !== 'function') cb = noop;

@@ -6,6 +6,10 @@ client.on('error', (err) => {
 const CustomFSChunkStore = require('./storage/custom-fs-chunk-store.js');
 
 export default class TorrentClient {
+  buildDefaultTemporaryPath (infohash) {
+    return CustomFSChunkStore.getDefaultTemporaryPath() + '/webtorrent/' + infohash;
+  };
+
   download (downloadInfo, downloadCallback, doneCallback) {
     console.log('download magnet link:', downloadInfo.magnetLink);
     console.log('download path', downloadInfo.downloadPath);

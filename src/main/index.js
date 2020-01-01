@@ -51,7 +51,8 @@ function createWindow () {
           name: metadata.name,
           infoHash: metadata.infoHash,
           magnetLink: magnetLink,
-          totalSize: metadata.length
+          totalSize: metadata.length,
+          defaultDownloadPath: torrentClient.buildDefaultTemporaryPath(metadata.infoHash)
         });
       });
     }
