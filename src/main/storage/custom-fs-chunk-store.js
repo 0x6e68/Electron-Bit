@@ -66,6 +66,7 @@ function Storage (chunkLength, opts) {
       if (self.closed) return cb(new Error('Storage is closed'));
       fx.mkdir(path.dirname(file.path), function (err) {
         if (err) {
+          console.log(err);
           return cb(err);
         }
         if (self.closed) return cb(new Error('Storage is closed'));

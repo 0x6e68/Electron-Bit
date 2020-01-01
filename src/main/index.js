@@ -1,6 +1,12 @@
 import {app, BrowserWindow} from 'electron';
 import TorrentClient from './torrent-client';
-const torrentClipboardListener = new TorrentClient();
+import MetainfoLoader from './metainfo-loader';
+import ClipboardTextListener from './clipboard-text-listener';
+
+const magnet = require('magnet-uri');
+const torrentClient = new TorrentClient();
+const metainfoLoader = new MetainfoLoader();
+const clipboardTextListener = new ClipboardTextListener();
 
 const ipcMain = require('electron').ipcMain;
 
@@ -35,12 +41,34 @@ function createWindow () {
     mainWindow = null;
   });
 
-  torrentClipboardListener.addListener(200,
-    (magnetLink) => mainWindow.webContents.send('magnet-link-detected', magnetLink),
-    (torrent) => mainWindow.webContents.send('torrent-loaded', torrent));
+  clipboardTextListener.addClipboardFunction({
+    startsWith: 'magnet:',
+    execute: (magnetLink) => {
+      const parsedMagnetLink = magnet.decode(magnetLink);
+      mainWindow.webContents.send('magnet-link-detected', parsedMagnetLink);
+      metainfoLoader.loadFromInfoHash(parsedMagnetLink.infoHash).then((metadata) => {
+        mainWindow.webContents.send('torrent-loaded', {
+          name: metadata.name,
+          infoHash: metadata.infoHash,
+          magnetLink: magnetLink,
+          totalSize: metadata.length
+        });
+      });
+    }
+  });
 
-  ipcMain.on('beginn-download', (event, downloadInfo) => {
-    torrentClipboardListener.download(mainWindow.webContents, downloadInfo);
+  ipcMain.on('beginn-download', (event, torrentId) => {
+    torrentClient.download(torrentId,
+      (downloadInfo) => {
+        console.log('torrent info hash: ' + downloadInfo.infoHash);
+        console.log('total downloaded: ' + downloadInfo.totalDownloaded);
+        console.log('torrent size: ' + downloadInfo.torrentSize);
+        console.log('download speed: ' + downloadInfo.downloadSpeed);
+        console.log('progress: ' + downloadInfo.progress);
+      },
+      (torrentInfoHash) => {
+        console.log('done ', torrentInfoHash, ' ...');
+      });
   });
 }
 
