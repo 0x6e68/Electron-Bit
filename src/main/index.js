@@ -61,15 +61,15 @@ function createWindow () {
   ipcMain.on('beginn-download', (event, torrentId) => {
     torrentClient.download(torrentId,
       (downloadInfo) => {
-        console.log('torrent info hash: ' + downloadInfo.infoHash);
-        console.log('total downloaded: ' + downloadInfo.totalDownloaded);
-        console.log('torrent size: ' + downloadInfo.torrentSize);
-        console.log('download speed: ' + downloadInfo.downloadSpeed);
-        console.log('progress: ' + downloadInfo.progress);
+        mainWindow.webContents.send('download-info', downloadInfo);
       },
       (torrentInfoHash) => {
         console.log('done ', torrentInfoHash, ' ...');
       });
+  });
+
+  ipcMain.on('pause-download', (event, infoHash) => {
+    torrentClient.pauseTorrent(infoHash);
   });
 }
 

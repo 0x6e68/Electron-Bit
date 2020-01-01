@@ -7,7 +7,7 @@ import store from './store';
 
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
-import {MdButton, MdCard, MdContent} from 'vue-material/dist/components';
+import {MdButton, MdCard, MdContent, MdProgress} from 'vue-material/dist/components';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -16,6 +16,7 @@ Vue.config.productionTip = false;
 Vue.use(MdButton);
 Vue.use(MdContent);
 Vue.use(MdCard);
+Vue.use(MdProgress);
 
 /* eslint-disable no-new */
 new Vue({
