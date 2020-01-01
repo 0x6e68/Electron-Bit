@@ -1,20 +1,26 @@
 <template>
-    <div>
-        <p>
-            [{{torrentMetainfo.infoHash}}] {{torrentMetainfo.name}}
-        </p>
-        <p>
-            <input type="text" :value="downloadPath" readonly>
-            <button type="button">
-                <label :for="'file_selector_' + torrentMetainfo.infoHash" class="btn">Select...</label>
-            </button>
-            <input v-on:change="changeDownloadPath" :id="'file_selector_' + torrentMetainfo.infoHash"
-                   style="visibility:hidden;"
-                   type="file" webkitdirectory>
-            <button v-on:click="triggerDownload">Start Download</button>
-        </p>
+    <md-card>
+        <md-card-header>
+            <div class="md-title">{{torrentMetainfo.name}}</div>
+            <div class="md-subhead">[{{torrentMetainfo.infoHash}}]</div>
+        </md-card-header>
 
-    </div>
+        <md-card-content>
+                <input type="text" :value="downloadPath" readonly>
+                <input v-on:change="changeDownloadPath" :id="'file_selector_' + torrentMetainfo.infoHash"
+                       style="visibility:hidden;"
+                       type="file" webkitdirectory>
+        </md-card-content>
+
+        <md-card-actions>
+            <md-button>
+                <label :for="'file_selector_' + torrentMetainfo.infoHash" class="btn">Select...</label>
+            </md-button>
+            <md-button v-on:click="triggerDownload">
+                Start Download
+            </md-button>
+        </md-card-actions>
+    </md-card>
 </template>
 
 <script>
