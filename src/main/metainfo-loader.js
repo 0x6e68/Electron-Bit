@@ -17,8 +17,9 @@ export default class MetainfoLoader {
       });
 
       setTimeout(() => {
+        console.log('timeout while loading ', infoHash);
         reject(new Error('timeout'));
-      }, 10000);
+      }, 60000);
     });
   }
 }

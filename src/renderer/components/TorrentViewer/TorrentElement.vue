@@ -6,9 +6,11 @@
         <p>
             <input type="text" :value="downloadPath" readonly>
             <button type="button">
-                <label for="files" class="btn">Select...</label>
+                <label :for="'file_selector_' + torrentMetainfo.infoHash" class="btn">Select...</label>
             </button>
-            <input v-on:change="changeDownloadPath" id="files" style="visibility:hidden;" type="file" webkitdirectory>
+            <input v-on:change="changeDownloadPath" :id="'file_selector_' + torrentMetainfo.infoHash"
+                   style="visibility:hidden;"
+                   type="file" webkitdirectory>
             <button v-on:click="triggerDownload">Start Download</button>
         </p>
 
@@ -30,7 +32,7 @@
         });
       },
       changeDownloadPath (event) {
-        console.log(event.target.files[0].path);
+        console.log(this.torrentMetainfo.infoHash, event.target.files[0].path);
         this.downloadPath = event.target.files[0].path;
       }
     },
