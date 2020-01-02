@@ -45,13 +45,8 @@ function createWindow () {
       const parsedMagnetLink = Magnet.decode(magnetLink);
       mainWindow.webContents.send('magnet-link-detected', parsedMagnetLink);
       metainfoLoader.loadFromInfoHash(parsedMagnetLink.infoHash).then((metadata) => {
-        mainWindow.webContents.send('torrent-loaded', {
-          name: metadata.name,
-          infoHash: metadata.infoHash,
-          magnetLink: magnetLink,
-          totalSize: metadata.length,
-          defaultDownloadPath: torrentClient.buildDefaultTemporaryPath(metadata.infoHash)
-        });
+        metadata.defaultDownloadPath = torrentClient.buildDefaultTemporaryPath(metadata.infoHash);
+        mainWindow.webContents.send('torrent-loaded', metadata);
       });
     }
   });

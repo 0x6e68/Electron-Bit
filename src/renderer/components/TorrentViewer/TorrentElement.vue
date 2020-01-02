@@ -2,7 +2,7 @@
     <md-card>
         <md-card-header>
             <div class="md-title">{{torrentMetainfo.name}}</div>
-            <div class="md-subhead">[{{torrentMetainfo.infoHash}}]</div>
+            <div class="md-subhead">[{{torrentMetainfo.infoHash}}] {{ totalSize }}</div>
         </md-card-header>
 
         <md-card-content>
@@ -17,10 +17,10 @@
                 {{ loadedSize }} / {{ totalSize }}
             </p>
             <p v-if="downloadSpeed">
-                download:{{ downloadSpeed }}
+                download: {{ downloadSpeed }}
             </p>
             <p v-if="uploadSpeed">
-                upload:{{ uploadSpeed }}
+                upload: {{ uploadSpeed }}
             </p>
         </md-card-content>
 
@@ -72,7 +72,7 @@
         downloadPath: this.torrentMetainfo.defaultDownloadPath,
         progress: 0,
         loadedSize: undefined,
-        totalSize: undefined,
+        totalSize: prettyBytes(this.torrentMetainfo.totalSize),
         downloadSpeed: undefined,
         uploadSpeed: undefined
       };
