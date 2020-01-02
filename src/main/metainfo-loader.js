@@ -1,10 +1,10 @@
 const WebTorrent = require('webtorrent');
 
 export default class MetainfoLoader {
-  loadFromInfoHash (infoHash) {
+  loadFromTorrentIdentifier (torrentIdentifier) {
     return new Promise((resolve) => {
       let client = new WebTorrent();
-      let torrent = client.add(infoHash);
+      let torrent = client.add(torrentIdentifier);
       torrent.on('metadata', () => {
         torrent.destroy();
         client.destroy();

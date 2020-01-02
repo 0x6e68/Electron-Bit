@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, shell} from 'electron';
+import {app, BrowserWindow, dialog, ipcMain, Menu, shell} from 'electron';
 import TorrentClient from './torrent-client';
 import MetainfoLoader from './metainfo-loader';
 import ClipboardTextListener from './clipboard-text-listener';
@@ -7,6 +7,7 @@ import * as Magnet from 'magnet-uri';
 const torrentClient = new TorrentClient();
 const metainfoLoader = new MetainfoLoader();
 const clipboardTextListener = new ClipboardTextListener();
+const fs = require('fs');
 
 /**
  * Set `__static` path to static files in production
@@ -35,6 +36,38 @@ function createWindow () {
 
   mainWindow.loadURL(winURL);
 
+  let menu = Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Load Torrent File',
+          click () {
+            const torrentFilePath = dialog.showOpenDialog({
+              filters: [{name: 'Torrents', extensions: ['torrent']}],
+              properties: ['openFile']
+            });
+            if (torrentFilePath && torrentFilePath.length === 1) {
+              fs.readFile(torrentFilePath[0], function (err, data) {
+                if (err) {
+                  throw err;
+                }
+                loadFromTorrentIdentifier(data);
+              });
+            }
+          }
+        },
+        {
+          label: 'Exit',
+          click () {
+            app.quit();
+          }
+        }
+      ]
+    }
+  ]);
+  Menu.setApplicationMenu(menu);
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -44,10 +77,7 @@ function createWindow () {
     execute: (magnetLink) => {
       const parsedMagnetLink = Magnet.decode(magnetLink);
       mainWindow.webContents.send('magnet-link-detected', parsedMagnetLink);
-      metainfoLoader.loadFromInfoHash(parsedMagnetLink.infoHash).then((metadata) => {
-        metadata.defaultDownloadPath = torrentClient.buildDefaultTemporaryPath(metadata.infoHash);
-        mainWindow.webContents.send('torrent-loaded', metadata);
-      });
+      loadFromTorrentIdentifier(parsedMagnetLink.infoHash);
     }
   });
 
@@ -70,6 +100,13 @@ function createWindow () {
 
   ipcMain.on('open-folder', (event, path) => {
     shell.showItemInFolder(path);
+  });
+}
+
+function loadFromTorrentIdentifier (torrentIdentifier) {
+  metainfoLoader.loadFromTorrentIdentifier(torrentIdentifier).then((metadata) => {
+    metadata.defaultDownloadPath = torrentClient.buildDefaultTemporaryPath(metadata.infoHash);
+    mainWindow.webContents.send('torrent-loaded', metadata);
   });
 }
 
