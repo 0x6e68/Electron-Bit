@@ -57,6 +57,8 @@
       },
       triggerPause () {
         electron.ipcRenderer.send('pause-download', this.torrentMetainfo.infoHash);
+        this.downloadSpeed = undefined;
+        this.uploadSpeed = undefined;
       },
       changeDownloadPath (event) {
         this.downloadPath = event.target.files[0].path;
@@ -84,8 +86,8 @@
           this.progress = downloadInfo.progress * 100;
           this.loadedSize = prettyBytes(downloadInfo.totalDownloaded);
           this.totalSize = prettyBytes(downloadInfo.torrentSize);
-          this.downloadSpeed = prettyBytes(downloadInfo.downloadSpeed) + '/ sec';
-          this.uploadSpeed = prettyBytes(downloadInfo.uploadSpeed) + '/ sec';
+          this.downloadSpeed = prettyBytes(downloadInfo.downloadSpeed) + ' / sec';
+          this.uploadSpeed = prettyBytes(downloadInfo.uploadSpeed) + ' / sec';
         }
       });
     }
