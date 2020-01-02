@@ -89,13 +89,18 @@ function createWindow () {
       (uploadInfo) => {
         mainWindow.webContents.send('upload-info', uploadInfo);
       },
-      (torrentInfoHash) => {
-        mainWindow.webContents.send('download-done', torrentInfoHash);
+      (infoHash) => {
+        mainWindow.webContents.send('download-done', infoHash);
       });
   });
 
   ipcMain.on('pause-download', (event, infoHash) => {
     torrentClient.pauseTorrent(infoHash);
+  });
+
+  ipcMain.on('remove-torrent', (event, infoHash) => {
+    torrentClient.pauseTorrent(infoHash);
+    mainWindow.webContents.send('torrent-removed', infoHash);
   });
 
   ipcMain.on('open-folder', (event, path) => {

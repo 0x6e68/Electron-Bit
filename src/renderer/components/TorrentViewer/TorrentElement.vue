@@ -37,6 +37,9 @@
             <md-button v-on:click="openFolder">
                 Open Folder
             </md-button>
+            <md-button v-on:click="removeTorrent">
+                Remove
+            </md-button>
         </md-card-actions>
     </md-card>
 </template>
@@ -58,6 +61,11 @@
       },
       triggerPause () {
         electron.ipcRenderer.send('pause-download', this.torrentMetainfo.infoHash);
+        this.downloadSpeed = undefined;
+        this.uploadSpeed = undefined;
+      },
+      removeTorrent () {
+        electron.ipcRenderer.send('remove-torrent', this.torrentMetainfo.infoHash);
         this.downloadSpeed = undefined;
         this.uploadSpeed = undefined;
       },

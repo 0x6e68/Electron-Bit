@@ -6,9 +6,9 @@
                              :info-hash="magnetLink.infoHash"></loading-magnet-link>
         <hr/>
 
-        <torrent-element v-for="torrentMetainfo in torrentMetainfos"
-                         v-bind:key="torrentMetainfo.infoHash"
-                         :torrent-metainfo="torrentMetainfo">
+        <torrent-element v-for="torrent in torrents"
+                         v-bind:key="torrent.infoHash"
+                         :torrent-metainfo="torrent">
         </torrent-element>
     </div>
 </template>
@@ -25,22 +25,27 @@
     data () {
       return {
         detectedMagnetLinks: [],
-        torrentMetainfos: []
+        torrents: []
       };
     },
     mounted () {
       electron.ipcRenderer.on('magnet-link-detected', (event, magnetLink) => {
-        console.log('magnet-link-detected');
         this.detectedMagnetLinks.push(magnetLink);
       });
-      electron.ipcRenderer.on('torrent-loaded', (event, torrentMetainfo) => {
-        this.removeFromLoadingMetainfos(torrentMetainfo.infoHash);
-        this.torrentMetainfos.push(torrentMetainfo);
+      electron.ipcRenderer.on('torrent-loaded', (event, torrent) => {
+        this.removeFromLoadingMetainfos(torrent.infoHash);
+        this.torrents.push(torrent);
+      });
+      electron.ipcRenderer.on('torrent-removed', (event, infoHash) => {
+        this.removeTorrent(infoHash);
       });
     },
     methods: {
       removeFromLoadingMetainfos (infoHash) {
         this.detectedMagnetLinks = this.detectedMagnetLinks.filter((item) => item.infoHash !== infoHash);
+      },
+      removeTorrent (infoHash) {
+        this.torrents = this.torrents.filter((item) => item.infoHash !== infoHash);
       }
     }
   };
