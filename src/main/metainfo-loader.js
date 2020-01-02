@@ -12,8 +12,8 @@ export default class MetainfoLoader {
           infoHash: torrent.infoHash,
           name: torrent.name,
           magnetLink: torrent.magnetURI,
-          totalSize: torrent.length
-          // torrentFile: torrent.torrentFile,
+          totalSize: torrent.length,
+          torrentBuffer: torrent.torrentFile
         });
       });
     });

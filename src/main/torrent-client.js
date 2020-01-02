@@ -45,7 +45,7 @@ export default class TorrentClient {
 
     console.log('download magnet link:', downloadInfo.magnetLink);
     console.log('download path', downloadInfo.downloadPath);
-    let torrent = client.add(downloadInfo.infoHash, {
+    let torrent = client.add(downloadInfo.torrentBuffer, {
       path: downloadInfo.downloadPath,
       store: (chunkLength, storeOpts) => {
         return new CustomFSChunkStore(chunkLength, {files: storeOpts.files});

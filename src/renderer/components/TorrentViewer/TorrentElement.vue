@@ -52,7 +52,8 @@
         electron.ipcRenderer.send('beginn-download', {
           infoHash: this.torrentMetainfo.infoHash,
           downloadPath: this.downloadPath,
-          magnetLink: this.torrentMetainfo.magnetLink
+          magnetLink: this.torrentMetainfo.magnetLink,
+          torrentBuffer: this.torrentMetainfo.torrentBuffer
         });
       },
       triggerPause () {
@@ -74,7 +75,8 @@
         loadedSize: undefined,
         totalSize: prettyBytes(this.torrentMetainfo.totalSize),
         downloadSpeed: undefined,
-        uploadSpeed: undefined
+        uploadSpeed: undefined,
+        torrentBuffer: this.torrentMetainfo.torrentBuffer
       };
     },
     props: [
