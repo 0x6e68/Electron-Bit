@@ -64,7 +64,7 @@ function createWindow () {
         mainWindow.webContents.send('download-info', downloadInfo);
       },
       (torrentInfoHash) => {
-        console.log('done ', torrentInfoHash, ' ...');
+        mainWindow.webContents.send('download-done', torrentInfoHash);
       });
   });
 

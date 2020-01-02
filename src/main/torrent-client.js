@@ -20,12 +20,12 @@ function destroyClient (infoHash) {
   let client = clients.find((client) => client.infoHash === infoHash);
   if (client) {
     console.log('client destroy', infoHash);
-    clients = clients.filter((client) => client.infoHash !== infoHash);
 
     client.destroy((err) => {
       if (err) {
         console.log(err);
       }
+      clients = clients.filter((client) => client.infoHash !== infoHash);
       console.log('client destroyed', infoHash);
     });
   }
@@ -59,9 +59,6 @@ export default class TorrentClient {
     });
     torrent.on('ready', () => {
       console.log('ready', torrent.infoHash);
-      for (let i = 0; i < torrent.files.length; i++) {
-        torrent.files[i].select();
-      }
     });
     torrent.on('infoHash', () => {
       console.log('infoHash', torrent.infoHash);

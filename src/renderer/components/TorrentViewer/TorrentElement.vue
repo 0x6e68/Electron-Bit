@@ -7,26 +7,26 @@
 
         <md-card-content>
             <p>
-                <input type="text" :value="downloadPath" readonly>
-                <input v-on:change="changeDownloadPath" :id="'file_selector_' + torrentMetainfo.infoHash"
+                <input id="download-path" type="text" :value="downloadPath" readonly>
+                <input v-on:change="changeDownloadPath" :id="'file-selector-' + torrentMetainfo.infoHash"
                        style="visibility:hidden;"
                        type="file" webkitdirectory>
             </p>
-            <p>
+            <p v-if="progress">
                 <md-progress-bar md-mode="determinate" :md-value="progress"></md-progress-bar>
                 {{ loadedSize }} / {{ totalSize }}
             </p>
-            <p>
+            <p v-if="downloadSpeed">
                 download:{{ downloadSpeed }}
             </p>
-            <p>
+            <p v-if="uploadSpeed">
                 upload:{{ uploadSpeed }}
             </p>
         </md-card-content>
 
         <md-card-actions>
             <md-button>
-                <label :for="'file_selector_' + torrentMetainfo.infoHash" class="btn">Select...</label>
+                <label :for="'file-selector-' + torrentMetainfo.infoHash" class="btn">Select...</label>
             </md-button>
             <md-button v-on:click="triggerDownload">
                 Start Download
@@ -46,7 +46,6 @@
     name: 'TorrentElement',
     methods: {
       triggerDownload () {
-        console.log('beginn-download', this.torrentMetainfo.infoHash);
         electron.ipcRenderer.send('beginn-download', {
           infoHash: this.torrentMetainfo.infoHash,
           downloadPath: this.downloadPath,
@@ -54,11 +53,9 @@
         });
       },
       triggerPause () {
-        console.log('pause', this.torrentMetainfo.infoHash);
         electron.ipcRenderer.send('pause-download', this.torrentMetainfo.infoHash);
       },
       changeDownloadPath (event) {
-        console.log(this.torrentMetainfo.infoHash, event.target.files[0].path);
         this.downloadPath = event.target.files[0].path;
       }
     },
@@ -66,10 +63,10 @@
       return {
         downloadPath: this.torrentMetainfo.defaultDownloadPath,
         progress: 0,
-        loadedSize: 'N/A',
-        totalSize: 'N/A',
-        downloadSpeed: 'N/A',
-        uploadSpeed: 'N/A'
+        loadedSize: undefined,
+        totalSize: undefined,
+        downloadSpeed: undefined,
+        uploadSpeed: undefined
       };
     },
     props: [
