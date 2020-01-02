@@ -33,7 +33,7 @@ function destroyClient (infoHash) {
 
 export default class TorrentClient {
   buildDefaultTemporaryPath (infohash) {
-    return CustomFSChunkStore.getDefaultTemporaryPath() + '/webtorrent/' + infohash;
+    return require('path').join(CustomFSChunkStore.getDefaultTemporaryPath(), 'webtorrent', infohash);
   };
 
   pauseTorrent (infohash) {

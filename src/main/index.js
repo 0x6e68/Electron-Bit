@@ -1,14 +1,12 @@
-import {app, BrowserWindow} from 'electron';
+import {app, BrowserWindow, ipcMain, shell} from 'electron';
 import TorrentClient from './torrent-client';
 import MetainfoLoader from './metainfo-loader';
 import ClipboardTextListener from './clipboard-text-listener';
+import * as Magnet from 'magnet-uri';
 
-const magnet = require('magnet-uri');
 const torrentClient = new TorrentClient();
 const metainfoLoader = new MetainfoLoader();
 const clipboardTextListener = new ClipboardTextListener();
-
-const ipcMain = require('electron').ipcMain;
 
 /**
  * Set `__static` path to static files in production
@@ -44,7 +42,7 @@ function createWindow () {
   clipboardTextListener.addClipboardFunction({
     startsWith: 'magnet:',
     execute: (magnetLink) => {
-      const parsedMagnetLink = magnet.decode(magnetLink);
+      const parsedMagnetLink = Magnet.decode(magnetLink);
       mainWindow.webContents.send('magnet-link-detected', parsedMagnetLink);
       metainfoLoader.loadFromInfoHash(parsedMagnetLink.infoHash).then((metadata) => {
         mainWindow.webContents.send('torrent-loaded', {
@@ -70,6 +68,10 @@ function createWindow () {
 
   ipcMain.on('pause-download', (event, infoHash) => {
     torrentClient.pauseTorrent(infoHash);
+  });
+
+  ipcMain.on('open-folder', (event, path) => {
+    shell.showItemInFolder(path);
   });
 }
 

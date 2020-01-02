@@ -34,6 +34,9 @@
             <md-button v-on:click="triggerPause">
                 Pause Download
             </md-button>
+            <md-button v-on:click="openFolder">
+                Open Folder
+            </md-button>
         </md-card-actions>
     </md-card>
 </template>
@@ -57,6 +60,9 @@
       },
       changeDownloadPath (event) {
         this.downloadPath = event.target.files[0].path;
+      },
+      openFolder () {
+        electron.ipcRenderer.send('open-folder', this.downloadPath);
       }
     },
     data () {
