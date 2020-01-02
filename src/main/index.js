@@ -61,6 +61,9 @@ function createWindow () {
       (downloadInfo) => {
         mainWindow.webContents.send('download-info', downloadInfo);
       },
+      (uploadInfo) => {
+        mainWindow.webContents.send('upload-info', uploadInfo);
+      },
       (torrentInfoHash) => {
         mainWindow.webContents.send('download-done', torrentInfoHash);
       });

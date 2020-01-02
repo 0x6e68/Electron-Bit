@@ -40,7 +40,7 @@ export default class TorrentClient {
     destroyClient(infohash);
   }
 
-  download (downloadInfo, downloadCallback, doneCallback) {
+  download (downloadInfo, downloadCallback, uploadCallback, doneCallback) {
     let client = createClient(downloadInfo.infoHash);
 
     console.log('download magnet link:', downloadInfo.magnetLink);
@@ -74,6 +74,12 @@ export default class TorrentClient {
         downloadSpeed: torrent.downloadSpeed,
         uploadSpeed: torrent.uploadSpeed,
         progress: torrent.progress
+      });
+    });
+    torrent.on('upload', (bytes) => {
+      uploadCallback({
+        infoHash: torrent.infoHash,
+        uploadSpeed: torrent.uploadSpeed
       });
     });
     torrent.on('done', () => {

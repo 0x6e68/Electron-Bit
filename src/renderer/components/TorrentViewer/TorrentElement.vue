@@ -87,7 +87,11 @@
           this.loadedSize = prettyBytes(downloadInfo.totalDownloaded);
           this.totalSize = prettyBytes(downloadInfo.torrentSize);
           this.downloadSpeed = prettyBytes(downloadInfo.downloadSpeed) + ' / sec';
-          this.uploadSpeed = prettyBytes(downloadInfo.uploadSpeed) + ' / sec';
+        }
+      });
+      electron.ipcRenderer.on('upload-info', (event, uploadInfo) => {
+        if (uploadInfo.infoHash === this.torrentMetainfo.infoHash) {
+          this.uploadSpeed = prettyBytes(uploadInfo.uploadSpeed) + ' / sec';
         }
       });
     }
