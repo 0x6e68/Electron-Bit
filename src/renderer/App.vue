@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
-  </div>
+    <div id="app">
+        <router-view></router-view>
+    </div>
 </template>
 
 <script>
@@ -11,12 +11,13 @@
 </script>
 
 <style>
-  body{
-    background-color: darkgray;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-  }
-  /* CSS */
+    body {
+        background-color: darkgray;
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+
+    /* CSS */
 </style>

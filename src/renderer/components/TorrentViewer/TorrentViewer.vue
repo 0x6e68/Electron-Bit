@@ -3,11 +3,14 @@
         <loading-magnet-link v-for="magnetLink in detectedMagnetLinks"
                              v-bind:key="magnetLink.infoHash"
                              :name="magnetLink.name"
-                             :info-hash="magnetLink.infoHash"></loading-magnet-link>
+                             :info-hash="magnetLink.infoHash"
+                             class="torrent-element-container">
+        </loading-magnet-link>
 
         <torrent-element v-for="torrent in torrents"
                          v-bind:key="torrent.infoHash"
-                         :torrent-metainfo="torrent">
+                         :torrent-metainfo="torrent"
+                         class="torrent-element-container">
         </torrent-element>
     </div>
 </template>
@@ -52,4 +55,7 @@
 </script>
 
 <style scoped>
+    .torrent-element-container {
+        margin: 10px 15px;
+    }
 </style>
