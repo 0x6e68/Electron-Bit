@@ -70,6 +70,8 @@ function createWindow () {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    torrentClient.destroy();
+    metainfoLoader.destroy();
   });
 
   clipboardTextListener.addClipboardFunction({

@@ -40,6 +40,12 @@ export default class TorrentClient {
     destroyClient(infohash);
   }
 
+  destroy () {
+    for (let client of clients) {
+      client.destroy();
+    }
+  }
+
   download (downloadInfo, downloadCallback, uploadCallback, doneCallback) {
     let client = createClient(downloadInfo.infoHash);
 

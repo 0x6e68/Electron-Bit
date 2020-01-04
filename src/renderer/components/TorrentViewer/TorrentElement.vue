@@ -16,22 +16,22 @@
                 <md-progress-bar md-mode="determinate" :md-value="progress"></md-progress-bar>
                 {{ loadedSize }} / {{ totalSize }}
             </p>
-            <p v-if="downloadSpeed">
+            <p v-if="downloadSpeed && state === torrentState.downloading">
                 download: {{ downloadSpeed }}
             </p>
-            <p v-if="uploadSpeed">
+            <p v-if="uploadSpeed && state === torrentState.downloading">
                 upload: {{ uploadSpeed }}
             </p>
         </md-card-content>
 
         <md-card-actions>
-            <md-button>
+            <md-button v-if="state === torrentState.stopped">
                 <label :for="'file-selector-' + torrentMetainfo.infoHash" class="btn">Select...</label>
             </md-button>
-            <md-button v-on:click="triggerDownload">
+            <md-button v-if="state === torrentState.stopped" v-on:click="triggerDownload">
                 Start Download
             </md-button>
-            <md-button v-on:click="triggerPause">
+            <md-button v-if="state === torrentState.downloading" v-on:click="triggerPause">
                 Pause Download
             </md-button>
             <md-button v-on:click="openFolder">
@@ -48,6 +48,12 @@
   const electron = require('electron');
   const prettyBytes = require('pretty-bytes');
 
+  const torrentState = {
+    stopped: 0,
+    downloading: 1,
+    finished: 2
+  };
+
   export default {
     name: 'TorrentElement',
     methods: {
@@ -58,11 +64,13 @@
           magnetLink: this.torrentMetainfo.magnetLink,
           torrentBuffer: this.torrentMetainfo.torrentBuffer
         });
+        this.state = this.torrentState.downloading;
       },
       triggerPause () {
         electron.ipcRenderer.send('pause-download', this.torrentMetainfo.infoHash);
         this.downloadSpeed = undefined;
         this.uploadSpeed = undefined;
+        this.state = this.torrentState.stopped;
       },
       removeTorrent () {
         electron.ipcRenderer.send('remove-torrent', this.torrentMetainfo.infoHash);
@@ -84,7 +92,9 @@
         totalSize: prettyBytes(this.torrentMetainfo.totalSize),
         downloadSpeed: undefined,
         uploadSpeed: undefined,
-        torrentBuffer: this.torrentMetainfo.torrentBuffer
+        torrentBuffer: this.torrentMetainfo.torrentBuffer,
+        state: torrentState.stopped,
+        torrentState: torrentState
       };
     },
     props: [
@@ -102,6 +112,13 @@
       electron.ipcRenderer.on('upload-info', (event, uploadInfo) => {
         if (uploadInfo.infoHash === this.torrentMetainfo.infoHash) {
           this.uploadSpeed = prettyBytes(uploadInfo.uploadSpeed) + ' / sec';
+        }
+      });
+      electron.ipcRenderer.on('download-done', (event, infoHash) => {
+        if (infoHash === this.torrentMetainfo.infoHash) {
+          this.downloadSpeed = undefined;
+          this.uploadSpeed = undefined;
+          this.state = torrentState.finished;
         }
       });
     }
