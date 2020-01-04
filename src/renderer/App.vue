@@ -11,5 +11,12 @@
 </script>
 
 <style>
+  body{
+    background-color: darkgray;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
   /* CSS */
 </style>

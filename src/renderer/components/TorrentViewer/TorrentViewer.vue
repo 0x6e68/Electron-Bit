@@ -4,7 +4,6 @@
                              v-bind:key="magnetLink.infoHash"
                              :name="magnetLink.name"
                              :info-hash="magnetLink.infoHash"></loading-magnet-link>
-        <hr/>
 
         <torrent-element v-for="torrent in torrents"
                          v-bind:key="torrent.infoHash"
@@ -53,5 +52,4 @@
 </script>
 
 <style scoped>
-
 </style>
