@@ -20,9 +20,12 @@ if (process.env.NODE_ENV !== 'development') {
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
 let mainWindow;
-const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`;
+
+function buildWindowUrl (path) {
+  return process.env.NODE_ENV === 'development'
+    ? `http://localhost:9080${path}`
+    : `file://${__dirname}/index.html${path}`;
+}
 
 function createWindow () {
   /**
@@ -34,7 +37,7 @@ function createWindow () {
     width: 1000
   });
 
-  mainWindow.loadURL(winURL);
+  mainWindow.loadURL(buildWindowUrl(''));
 
   let menu = Menu.buildFromTemplate([
     {
