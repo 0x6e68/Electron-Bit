@@ -16,6 +16,9 @@
                 <md-progress-bar md-mode="determinate" :md-value="progress"></md-progress-bar>
                 {{ loadedSize }} / {{ totalSize }}
             </p>
+            <p v-if="timeRemaining && state === torrentState.downloading">
+                time remaining: {{ timeRemaining }}
+            </p>
             <p v-if="downloadSpeed && state === torrentState.downloading">
                 download: {{ downloadSpeed }}
             </p>
@@ -47,6 +50,7 @@
 <script>
   const electron = require('electron');
   const prettyBytes = require('pretty-bytes');
+  const prettyMilliseconds = require('pretty-ms');
 
   const torrentState = {
     stopped: 0,
@@ -94,7 +98,8 @@
         uploadSpeed: undefined,
         torrentBuffer: this.torrentMetainfo.torrentBuffer,
         state: torrentState.stopped,
-        torrentState: torrentState
+        torrentState: torrentState,
+        timeRemaining: undefined
       };
     },
     props: [
@@ -107,6 +112,7 @@
           this.loadedSize = prettyBytes(downloadInfo.totalDownloaded);
           this.totalSize = prettyBytes(downloadInfo.torrentSize);
           this.downloadSpeed = prettyBytes(downloadInfo.downloadSpeed) + ' / sec';
+          this.timeRemaining = prettyMilliseconds(downloadInfo.timeRemaining);
         }
       });
       electron.ipcRenderer.on('upload-info', (event, uploadInfo) => {

@@ -79,7 +79,8 @@ export default class TorrentClient {
         torrentSize: torrent.length,
         downloadSpeed: torrent.downloadSpeed,
         uploadSpeed: torrent.uploadSpeed,
-        progress: torrent.progress
+        progress: torrent.progress,
+        timeRemaining: torrent.timeRemaining
       });
     });
     torrent.on('upload', (bytes) => {
