@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/TorrentViewer/TorrentViewer').default
     },
     {
+      path: '/test',
+      name: 'test',
+      component: require('@/components/LandingPage/LandingPage').default
+    },
+    {
       path: '*',
       redirect: '/'
     }
