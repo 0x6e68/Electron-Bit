@@ -234,7 +234,7 @@ Storage.prototype.destroy = function (cb) {
     var tasks = self.files.map(function (file) {
       return function (cb) {
         console.log('destroy', file);
-        rimraf(file.path, {maxBusyTries: 10}, cb);
+        rimraf(file.path, { maxBusyTries: 10 }, cb);
       };
     });
     parallel(tasks, cb);

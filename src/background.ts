@@ -1,13 +1,16 @@
 'use strict';
 
-import { app, BrowserWindow, protocol } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol } from 'electron';
 import { createProtocol, installVueDevtools } from 'vue-cli-plugin-electron-builder/lib';
+import { DownloadClientSpec, DownloadInfo, UploadInfo } from '@/lib/download-client';
+import TorrentClient from '@/lib/torrent-client';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
+const torrentClient: TorrentClient = new TorrentClient();
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
@@ -67,6 +70,28 @@ app.on('ready', async () => {
     }
   }
   createWindow();
+
+  torrentClient.on('download', (downloadInfo: DownloadInfo) => {
+    if (win) {
+      win.webContents.send('download-info', downloadInfo);
+    }
+  });
+
+  torrentClient.on('upload', (uploadInfo: UploadInfo) => {
+    if (win) {
+      win.webContents.send('upload-info', uploadInfo);
+    }
+  });
+
+  torrentClient.on('done', (infoHash: string) => {
+    if (win) {
+      win.webContents.send('download-done', infoHash);
+    }
+  });
+
+  ipcMain.on('beginn-download', (event:any, spec: DownloadClientSpec) => {
+    torrentClient.downloadTorrent(spec);
+  });
 });
 
 // Exit cleanly on request from parent process in development mode.
