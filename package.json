@@ -15,6 +15,7 @@
   "dependencies": {
     "@types/node": "^13.1.4",
     "@types/webtorrent": "^0.107.1",
+    "@types/vue-material": "git+https://github.com/calebsander/vue-material-types.git",
     "pretty-bytes": "^5.3.0",
     "pretty-ms": "^5.1.0",
     "core-js": "^3.4.4",
@@ -27,7 +28,6 @@
     "magnet-uri": "^5.2.4"
   },
   "devDependencies": {
-    "@types/vue-material": "git+https://github.com/calebsander/vue-material-types.git",
     "@vue/cli-plugin-babel": "^4.1.0",
     "@vue/cli-plugin-eslint": "^4.1.0",
     "@vue/cli-plugin-router": "^4.1.0",

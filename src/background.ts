@@ -30,9 +30,9 @@ function loadFromTorrentIdentifier (torrentIdentifier: TorrentIdentifier) {
   });
 }
 
-function sendToMainWindow (channel: string, ...args: any[]) {
+function sendToMainWindow (channel: string, arg: any) {
   if (win) {
-    win.webContents.send(channel, args);
+    win.webContents.send(channel, arg);
   }
 }
 
@@ -128,7 +128,10 @@ app.on('ready', async () => {
     startsWith: 'magnet:',
     execute: (magnetLinkText) => {
       const parsedMagnetLink: any = Magnet.decode(magnetLinkText);
-      sendToMainWindow('magnet-link-detected', parsedMagnetLink);
+      sendToMainWindow('magnet-link-detected', {
+        name: parsedMagnetLink.name,
+        infoHash: parsedMagnetLink.infoHash
+      });
       loadFromTorrentIdentifier(parsedMagnetLink.infoHash);
     }
   });

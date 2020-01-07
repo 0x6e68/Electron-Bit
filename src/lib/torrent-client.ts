@@ -70,7 +70,7 @@ export default class TorrentClient extends EventEmitter {
     const client = this.createClient(torrentDownload);
     const torrent: Torrent = client.instance.add(client.torrentDownload.torrentBuffer, {
       path: client.torrentDownload.downloadPath,
-      store: (chunkLength, storeOpts) => {
+      store: function (chunkLength, storeOpts) {
         return new CustomFSChunkStore(chunkLength, { files: storeOpts.files });
       }
     });
@@ -81,6 +81,14 @@ export default class TorrentClient extends EventEmitter {
 
     torrent.on('warning', (err: any) => {
       console.log(err);
+    });
+
+    torrent.on('metadata', () => {
+      console.log('metadata');
+    });
+
+    torrent.on('ready', () => {
+      console.log('ready');
     });
 
     torrent.on('download', (bytes: number) => {
