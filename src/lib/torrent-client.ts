@@ -1,30 +1,45 @@
-import { DownloadClient, DownloadClientSpec, DownloadInfo, UploadInfo } from '@/lib/download-client';
 import { EventEmitter } from 'events';
+import WebTorrent, { Torrent } from 'webtorrent';
+
+const CustomFSChunkStore = require('./storage/custom-fs-chunk-store.js');
+
+export interface TorrentDownload {
+  infoHash: string,
+  downloadPath: string,
+  torrentBuffer: Buffer
+}
+
+export interface DownloadClient {
+  torrentDownload: TorrentDownload,
+  instance: WebTorrent.Instance
+}
+
+export interface DownloadInfo {
+  infoHash: string,
+  totalDownloaded: number,
+  torrentSize: number,
+  downloadSpeed: number,
+  uploadSpeed: number,
+  progress: number,
+  timeRemaining: number,
+}
+
+export interface UploadInfo {
+  infoHash: string,
+  uploadSpeed: number
+}
 
 export default class TorrentClient extends EventEmitter {
   private clients: DownloadClient[] = [];
 
-  private createClient (spec: DownloadClientSpec): DownloadClient {
-    const client = new DownloadClient(spec);
+  private createClient (spec: TorrentDownload) {
+    const client = {
+      torrentDownload: spec,
+      instance: new WebTorrent()
+    };
 
-    client.on('error', (err: any) => {
+    client.instance.on('error', (err: any) => {
       console.log(err);
-    });
-
-    client.on('warning', (err: any) => {
-      console.log(err);
-    });
-
-    client.on('download', (downloadInfo: DownloadInfo) => {
-      this.emit('download', downloadInfo);
-    });
-
-    client.on('upload', (uploadInfo: UploadInfo) => {
-      this.emit('upload', uploadInfo);
-    });
-
-    client.on('done', (infoHash: string) => {
-      this.emit('done', infoHash);
     });
 
     this.clients.push(client);
@@ -32,33 +47,67 @@ export default class TorrentClient extends EventEmitter {
   }
 
   private destroyClient (infoHash: string) {
-    let client = this.clients.find((client) => client.downloadClientSpec.infoHash === infoHash);
+    let client = this.clients.find((client) => client.torrentDownload.infoHash === infoHash);
     if (client) {
-      client.destroy((err: any) => {
+      client.instance.destroy((err: any) => {
         if (err) {
           console.log(err);
         }
-        this.clients = this.clients.filter((client) => client.downloadClientSpec.infoHash !== infoHash);
+        this.clients = this.clients.filter((client) => client.torrentDownload.infoHash !== infoHash);
       });
     }
   }
 
   buildDefaultTemporaryPath (infohash: string) {
-    return require('path').join(require('./storage/custom-fs-chunk-store.js').getDefaultTemporaryPath(), 'webtorrent', infohash);
+    return require('path').join(CustomFSChunkStore.getDefaultTemporaryPath(), 'webtorrent', infohash);
   };
 
   pauseTorrent (infohash: string) {
     this.destroyClient(infohash);
   }
 
-  destroy () {
-    for (let client of this.clients) {
-      client.destroy();
-    }
-  }
+  download (torrentDownload: TorrentDownload) {
+    const client = this.createClient(torrentDownload);
+    const torrent: Torrent = client.instance.add(client.torrentDownload.torrentBuffer, {
+      path: client.torrentDownload.downloadPath,
+      store: (chunkLength, storeOpts) => {
+        return new CustomFSChunkStore(chunkLength, { files: storeOpts.files });
+      }
+    });
 
-  downloadTorrent (spec: DownloadClientSpec) {
-    let client = this.createClient(spec);
-    client.beginnDownload();
+    torrent.on('error', (err: any) => {
+      console.log(err);
+    });
+
+    torrent.on('warning', (err: any) => {
+      console.log(err);
+    });
+
+    torrent.on('download', (bytes: number) => {
+      const downloadInfo: DownloadInfo = {
+        infoHash: torrent.infoHash,
+        totalDownloaded: torrent.downloaded,
+        torrentSize: torrent.length,
+        downloadSpeed: torrent.downloadSpeed,
+        uploadSpeed: torrent.uploadSpeed,
+        progress: torrent.progress,
+        timeRemaining: torrent.timeRemaining
+      };
+
+      this.emit('download', downloadInfo);
+    });
+
+    torrent.on('upload', (bytes: number) => {
+      const uploadInfo: UploadInfo = {
+        infoHash: torrent.infoHash,
+        uploadSpeed: torrent.uploadSpeed
+      };
+
+      this.emit('upload', uploadInfo);
+    });
+
+    torrent.on('done', () => {
+      this.emit('done', torrent.infoHash);
+    });
   }
 }

@@ -8,7 +8,11 @@ const routes = [
   {
     path: '/',
     name: 'torrent-viewer',
-    component: Home
+    component: require('@/components/TorrentViewer/TorrentViewer').default
+  },
+  {
+    path: '*',
+    redirect: '/'
   }
 ];
 

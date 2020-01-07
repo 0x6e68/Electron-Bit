@@ -1,19 +1,40 @@
 'use strict';
 
-import { app, BrowserWindow, ipcMain, protocol } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, protocol, shell } from 'electron';
 import { createProtocol, installVueDevtools } from 'vue-cli-plugin-electron-builder/lib';
-import { DownloadClientSpec, DownloadInfo, UploadInfo } from '@/lib/download-client';
-import TorrentClient from '@/lib/torrent-client';
+import TorrentClient, { DownloadInfo, TorrentDownload, UploadInfo } from '@/lib/torrent-client';
+import ClipboardTextListener from '@/lib/clipboard-text-listener';
+import MetadataLoader, { TorrentIdentifier } from '@/lib/metadata-loader';
+import * as Magnet from 'magnet-uri';
+import * as fs from 'fs';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
-const torrentClient: TorrentClient = new TorrentClient();
+
+const torrentClient = new TorrentClient();
+const clipboardTextListener = new ClipboardTextListener();
+const metadataLoader = new MetadataLoader();
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
+
+function loadFromTorrentIdentifier (torrentIdentifier: TorrentIdentifier) {
+  metadataLoader.loadFromTorrentIdentifier(torrentIdentifier).then((metadata) => {
+    if (win) {
+      metadata.defaultDownloadPath = torrentClient.buildDefaultTemporaryPath(metadata.infoHash);
+      sendToMainWindow('torrent-loaded', metadata);
+    }
+  });
+}
+
+function sendToMainWindow (channel: string, ...args: any[]) {
+  if (win) {
+    win.webContents.send(channel, args);
+  }
+}
 
 function createWindow () {
   // Create the browser window.
@@ -24,6 +45,38 @@ function createWindow () {
       nodeIntegration: true
     }
   });
+
+  let menu = Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Load Torrent File',
+          click () {
+            const torrentFilePath = dialog.showOpenDialog({
+              filters: [{ name: 'Torrents', extensions: ['torrent'] }],
+              properties: ['openFile']
+            });
+            if (torrentFilePath && torrentFilePath.length === 1) {
+              fs.readFile(torrentFilePath[0], function (err, data) {
+                if (err) {
+                  throw err;
+                }
+                loadFromTorrentIdentifier(data);
+              });
+            }
+          }
+        },
+        {
+          label: 'Exit',
+          click () {
+            app.quit();
+          }
+        }
+      ]
+    }
+  ]);
+  Menu.setApplicationMenu(menu);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -71,26 +124,42 @@ app.on('ready', async () => {
   }
   createWindow();
 
-  torrentClient.on('download', (downloadInfo: DownloadInfo) => {
-    if (win) {
-      win.webContents.send('download-info', downloadInfo);
+  clipboardTextListener.addClipboardFunction({
+    startsWith: 'magnet:',
+    execute: (magnetLinkText) => {
+      const parsedMagnetLink: any = Magnet.decode(magnetLinkText);
+      sendToMainWindow('magnet-link-detected', parsedMagnetLink);
+      loadFromTorrentIdentifier(parsedMagnetLink.infoHash);
     }
+  });
+
+  torrentClient.on('download', (downloadInfo: DownloadInfo) => {
+    sendToMainWindow('download-info', downloadInfo);
   });
 
   torrentClient.on('upload', (uploadInfo: UploadInfo) => {
-    if (win) {
-      win.webContents.send('upload-info', uploadInfo);
-    }
+    sendToMainWindow('upload-info', uploadInfo);
   });
 
   torrentClient.on('done', (infoHash: string) => {
-    if (win) {
-      win.webContents.send('download-done', infoHash);
-    }
+    sendToMainWindow('download-done', infoHash);
   });
 
-  ipcMain.on('beginn-download', (event:any, spec: DownloadClientSpec) => {
-    torrentClient.downloadTorrent(spec);
+  ipcMain.on('beginn-download', (event:any, torrentDownload: TorrentDownload) => {
+    torrentClient.download(torrentDownload);
+  });
+
+  ipcMain.on('pause-download', (event:any, infoHash: string) => {
+    torrentClient.pauseTorrent(infoHash);
+  });
+
+  ipcMain.on('remove-torrent', (event:any, infoHash: string) => {
+    torrentClient.pauseTorrent(infoHash);
+    sendToMainWindow('torrent-removed', infoHash);
+  });
+
+  ipcMain.on('open-folder', (event:any, path:string) => {
+    shell.showItemInFolder(path);
   });
 });
 

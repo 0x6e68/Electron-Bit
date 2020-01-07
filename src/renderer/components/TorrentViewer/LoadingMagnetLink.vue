@@ -11,17 +11,17 @@
 </template>
 
 <script>
-  export default {
-    name: 'LoadingMagnetLink',
-    props: {
-      name: {
-        type: String
-      },
-      infoHash: {
-        type: String
-      }
+export default {
+  name: 'LoadingMagnetLink',
+  props: {
+    name: {
+      type: String
+    },
+    infoHash: {
+      type: String
     }
-  };
+  }
+};
 </script>
 
 <style scoped>
