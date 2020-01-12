@@ -7,9 +7,9 @@
                              class="torrent-element-container">
         </loading-magnet-link>
 
-        <torrent-element v-for="torrent in torrents"
-                         v-bind:key="torrent.infoHash"
-                         :torrent-metainfo="torrent"
+        <torrent-element v-for="metainfo in metainfos"
+                         v-bind:key="metainfo.infoHash"
+                         :torrent-metainfo="metainfo"
                          class="torrent-element-container">
         </torrent-element>
     </div>
@@ -18,6 +18,7 @@
 <script>
 import LoadingMagnetLink from './LoadingMagnetLink';
 import TorrentElement from './TorrentElement';
+import { Metadata } from '../../../lib/metadata-loader';
 
 const electron = require('electron');
 
@@ -27,30 +28,28 @@ export default {
   data () {
     return {
       detectedMagnetLinks: [],
-      torrents: []
+      metainfos: []
     };
   },
   mounted () {
     electron.ipcRenderer.on('magnet-link-detected', (event, magnetLink) => {
-      this.detectedMagnetLinks.push(magnetLink);
+      // TODO
     });
 
-    electron.ipcRenderer.on('torrent-loaded', (event, torrent) => {
-      console.log('torrent-loaded', torrent.infoHash);
-      this.removeFromLoadingMetainfos(torrent.infoHash);
-      this.torrents.push(torrent);
+    electron.ipcRenderer.on('torrent-loaded', (event, metainfo) => {
+      // TODO Metadata
     });
 
     electron.ipcRenderer.on('torrent-removed', (event, infoHash) => {
-      this.removeTorrent(infoHash);
+      // TODO
     });
   },
   methods: {
     removeFromLoadingMetainfos (infoHash) {
-      this.detectedMagnetLinks = this.detectedMagnetLinks.filter((item) => item.infoHash !== infoHash);
+      // TODO
     },
     removeTorrent (infoHash) {
-      this.torrents = this.torrents.filter((item) => item.infoHash !== infoHash);
+      // TODO
     }
   }
 };

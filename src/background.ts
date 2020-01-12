@@ -12,7 +12,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win: BrowserWindow | null;
+let mainWindow: BrowserWindow | null;
 
 const torrentClient = new TorrentClient();
 const clipboardTextListener = new ClipboardTextListener();
@@ -21,24 +21,9 @@ const metadataLoader = new MetadataLoader();
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
-function loadFromTorrentIdentifier (torrentIdentifier: TorrentIdentifier) {
-  metadataLoader.loadFromTorrentIdentifier(torrentIdentifier).then((metadata) => {
-    if (win) {
-      metadata.defaultDownloadPath = torrentClient.buildDefaultTemporaryPath(metadata.infoHash);
-      sendToMainWindow('torrent-loaded', metadata);
-    }
-  });
-}
-
-function sendToMainWindow (channel: string, arg: any) {
-  if (win) {
-    win.webContents.send(channel, arg);
-  }
-}
-
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -57,13 +42,9 @@ function createWindow () {
               filters: [{ name: 'Torrents', extensions: ['torrent'] }],
               properties: ['openFile']
             });
+
             if (torrentFilePath && torrentFilePath.length === 1) {
-              fs.readFile(torrentFilePath[0], function (err, data) {
-                if (err) {
-                  throw err;
-                }
-                loadFromTorrentIdentifier(data);
-              });
+              // TODO: fs.readFile and load torrent
             }
           }
         },
@@ -80,16 +61,16 @@ function createWindow () {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
-    if (!process.env.IS_TEST) win.webContents.openDevTools();
+    mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
+    if (!process.env.IS_TEST) mainWindow.webContents.openDevTools();
   } else {
     createProtocol('app');
     // Load the index.html when not in development
-    win.loadURL('app://./index.html');
+    mainWindow.loadURL('app://./index.html');
   }
 
-  win.on('closed', () => {
-    win = null;
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 }
 
@@ -105,7 +86,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (win === null) {
+  if (mainWindow === null) {
     createWindow();
   }
 });
@@ -124,47 +105,29 @@ app.on('ready', async () => {
   }
   createWindow();
 
-  clipboardTextListener.addClipboardFunction({
-    startsWith: 'magnet:',
-    execute: (magnetLinkText) => {
-      const parsedMagnetLink: any = Magnet.decode(magnetLinkText);
-      sendToMainWindow('magnet-link-detected', {
-        name: parsedMagnetLink.name,
-        infoHash: parsedMagnetLink.infoHash
-      });
-      loadFromTorrentIdentifier(parsedMagnetLink.infoHash);
-    }
-  });
-
-  torrentClient.on('download', (downloadInfo: DownloadInfo) => {
-    sendToMainWindow('download-info', downloadInfo);
-  });
-
-  torrentClient.on('upload', (uploadInfo: UploadInfo) => {
-    sendToMainWindow('upload-info', uploadInfo);
-  });
-
-  torrentClient.on('done', (infoHash: string) => {
-    sendToMainWindow('download-done', infoHash);
-  });
-
-  ipcMain.on('beginn-download', (event:any, torrentDownload: TorrentDownload) => {
-    torrentClient.download(torrentDownload);
-  });
-
-  ipcMain.on('pause-download', (event:any, infoHash: string) => {
-    torrentClient.pauseTorrent(infoHash);
-  });
-
-  ipcMain.on('remove-torrent', (event:any, infoHash: string) => {
-    torrentClient.pauseTorrent(infoHash);
-    sendToMainWindow('torrent-removed', infoHash);
-  });
-
-  ipcMain.on('open-folder', (event:any, path:string) => {
-    shell.showItemInFolder(path);
-  });
+  // TODO features
+  // -> clipboard: 'magnet-link-detected' ( Magnet.decode -> name, infoHash)
+  // -> broadcast download informations: get 'download' (DownloadInfo) send 'download-info'
+  // -> broadcast upload informations: get 'upload' (UploadInfo) send 'upload-info'
+  // -> broadcast download done: get 'done' send 'download-done'
+  // -> beginn new download: get 'beginn-download' and beginn download
+  // -> pause download: get 'pause-download' and stop download
+  // -> remove download: get 'remove-torrent', remove download and send 'torrent-removed'
+  // -> open folder: get 'open-folder' and open location via 'shell.showItemInFolder'
 });
+
+function loadFromTorrentIdentifier (torrentIdentifier: TorrentIdentifier) {
+  metadataLoader.loadFromTorrentIdentifier(torrentIdentifier).then((metadata) => {
+    metadata.defaultDownloadPath = torrentClient.buildDefaultTemporaryPath(metadata.infoHash);
+    // TODO: send 'torrent-loaded' with metadata
+  });
+}
+
+function sendToMainWindow (channel: string, arg: any) {
+  if (mainWindow) {
+    mainWindow.webContents.send(channel, arg);
+  }
+}
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

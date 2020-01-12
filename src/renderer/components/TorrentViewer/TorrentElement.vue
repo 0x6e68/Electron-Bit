@@ -62,22 +62,17 @@ export default {
   name: 'TorrentElement',
   methods: {
     triggerDownload () {
-      electron.ipcRenderer.send('beginn-download', {
-        infoHash: this.torrentMetainfo.infoHash,
-        downloadPath: this.downloadPath,
-        magnetLink: this.torrentMetainfo.magnetLink,
-        torrentBuffer: this.torrentMetainfo.torrentBuffer
-      });
-      this.state = this.torrentState.downloading;
+      // TODO send 'beginn-download' with TorrentDownload
+      // TODO set state to downloading
     },
     triggerPause () {
-      electron.ipcRenderer.send('pause-download', this.torrentMetainfo.infoHash);
+      // TODO send 'pause-download' with torrentMetainfo.infoHash
       this.downloadSpeed = undefined;
       this.uploadSpeed = undefined;
-      this.state = this.torrentState.stopped;
+      // TODO set state to stopped
     },
     removeTorrent () {
-      electron.ipcRenderer.send('remove-torrent', this.torrentMetainfo.infoHash);
+      // TODO send 'remove-torrent' with downloadPath
       this.downloadSpeed = undefined;
       this.uploadSpeed = undefined;
     },
@@ -85,19 +80,19 @@ export default {
       this.downloadPath = event.target.files[0].path;
     },
     openFolder () {
-      electron.ipcRenderer.send('open-folder', this.downloadPath);
+      // TODO send 'open-folder' with downloadPath
     }
   },
   data () {
     return {
-      downloadPath: this.torrentMetainfo.defaultDownloadPath,
+      downloadPath: undefined, // TODO default path
       progress: 0,
       loadedSize: undefined,
-      totalSize: prettyBytes(this.torrentMetainfo.totalSize),
+      totalSize: undefined, // TODO
       downloadSpeed: undefined,
       uploadSpeed: undefined,
-      torrentBuffer: this.torrentMetainfo.torrentBuffer,
-      state: torrentState.stopped,
+      torrentBuffer: undefined, // TODO
+      state: undefined, // TODO
       torrentState: torrentState,
       timeRemaining: undefined
     };
@@ -107,24 +102,22 @@ export default {
   ],
   mounted () {
     electron.ipcRenderer.on('download-info', (event, downloadInfo) => {
-      if (downloadInfo.infoHash === this.torrentMetainfo.infoHash) {
-        this.progress = downloadInfo.progress * 100;
-        this.loadedSize = prettyBytes(downloadInfo.totalDownloaded);
-        this.totalSize = prettyBytes(downloadInfo.torrentSize);
-        this.downloadSpeed = prettyBytes(downloadInfo.downloadSpeed) + ' / sec';
-        this.timeRemaining = prettyMilliseconds(downloadInfo.timeRemaining);
-      }
+      // TODO progress
+      // TODO loadedSize (prettyBytes)
+      // TODO totalSize (prettyBytes)
+      // TODO downloadSpeed (prettyBytes)
+      // TODO timeRemaining  (prettyMilliseconds)
     });
+
     electron.ipcRenderer.on('upload-info', (event, uploadInfo) => {
-      if (uploadInfo.infoHash === this.torrentMetainfo.infoHash) {
-        this.uploadSpeed = prettyBytes(uploadInfo.uploadSpeed) + ' / sec';
-      }
+      // TODO update upload speed
     });
+
     electron.ipcRenderer.on('download-done', (event, infoHash) => {
       if (infoHash === this.torrentMetainfo.infoHash) {
         this.downloadSpeed = undefined;
         this.uploadSpeed = undefined;
-        this.state = torrentState.finished;
+        // TODO set state to finished
       }
     });
   }
