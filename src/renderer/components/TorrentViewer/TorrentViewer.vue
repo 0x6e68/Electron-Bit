@@ -36,7 +36,6 @@ export default {
     });
 
     electron.ipcRenderer.on('torrent-loaded', (event, torrent) => {
-      console.log('torrent-loaded', torrent.infoHash);
       this.removeFromLoadingMetainfos(torrent.infoHash);
       this.torrents.push(torrent);
     });
